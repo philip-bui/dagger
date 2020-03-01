@@ -1,7 +1,7 @@
 {
-  "name": "dagger",
-  "version": "1.0.1",
-  "description": "React Native Accessible",
+  "name": "dagger-di",
+  "version": "1.0.0",
+  "description": "Dagger Dependency Injection",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint .",
@@ -71,6 +71,7 @@
     "extends": [
       "react-native-lit"
     ],
+
     "ecmaFeatures": {
       "experimentalDecorators": true,
       "legacyDecorators": true

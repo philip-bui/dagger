@@ -1,8 +1,8 @@
 # Dagger
 [![Actions Status](https://github.com/philip-bui/dagger/workflows/build/badge.svg)](https://github.com/philip-bui/dagger/actions)
 [![CodeCov](https://codecov.io/gh/philip-bui/dagger/branch/master/graph/badge.svg)](https://codecov.io/gh/philip-bui/dagger)
-[![npm](https://img.shields.io/npm/v/dagger.svg?style=flat)](https://www.npmjs.com/package/dagger)
-![Downloads](https://img.shields.io/npm/dt/dagger.svg?style=flat)
+[![npm](https://img.shields.io/npm/v/dagger-di.svg?style=flat)](https://www.npmjs.com/package/dagger-di)
+![Downloads](https://img.shields.io/npm/dt/dagger-di.svg?style=flat)
 
 Dagger is a dependency injection container using Decorators. 
 

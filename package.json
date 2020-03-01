@@ -1,0 +1,86 @@
+{
+  "name": "dagger",
+  "version": "1.0.1",
+  "description": "React Native Accessible",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "jest",
+    "codecov": "jest --collectCoverage --coverageReporters='lcov'"
+  },
+  "author": "Philip Bui",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philip-bui/dagger.git"
+  },
+  "homepage": "https://github.com/philip-bui/dagger#readme",
+  "bugs": {
+    "url": "https://github.com/philip-bui/dagger/issues"
+  },
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "javascript",
+    "di",
+    "ioc",
+    "dependency-injection"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.6",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-decorators": "^7.8.3",
+    "@babel/preset-env": "^7.8.6",
+    "@babel/preset-react": "^7.8.3",
+    "babel-jest": "^25.1.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "eslint-config-react-native-lit": "^1.0.2",
+    "jest": "^25.1.0",
+    "prettier": "^1.18.2",
+    "react": "^16.11.0",
+    "react-dom": "^16.13.0"
+  },
+  "peerDependencies": {
+    "@babel/core": "*",
+    "@babel/plugin-proposal-class-properties": "*",
+    "@babel/plugin-proposal-decorators": "*",
+    "@babel/preset-env": "*",
+    "react": "*"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ],
+    "plugins": [
+      [
+        "@babel/plugin-proposal-decorators",
+        {
+          "legacy": true
+        }
+      ],
+      "@babel/plugin-proposal-class-properties"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-native-lit"
+    ],
+    "ecmaFeatures": {
+      "experimentalDecorators": true,
+      "legacyDecorators": true
+    }
+  },
+  "jest": {
+    "clearMocks": true,
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "testEnvironment": "node"
+  }
+}

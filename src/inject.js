@@ -10,18 +10,16 @@ export const validateInjections = names =>
 export const Inject = (...names) => {
   validateInjections(names);
   return Class => {
-    Class.constructorWithInjections = (...args) =>
+    Class.prototype.constructor = (...args) =>
       new Class(
         ...args,
-        ...resolveDependencies(
-          Class.constructorWithInjections.dagger.dependencies
-        )
+        ...resolveDependencies(Class.prototype.constructor.dagger.dependencies)
       );
-    Class.constructorWithInjections.dagger = {
+    Class.prototype.constructor.dagger = {
       name: Class.name,
       dependencies: names
     };
-    return Class.constructorWithInjections;
+    return Class.prototype.constructor;
   };
 };
 
@@ -37,10 +35,14 @@ export const assignDependencies = (target, names) =>
 export const InjectPrototype = (...names) => {
   validateInjections(names);
   return Class => {
-    return (...args) => {
+    Class.prototype.constructor = (...args) => {
       assignDependencies(Class.prototype, names);
       return new Class(...args);
     };
+    Class.prototype.constructor.dagger = {
+      name: Class.name
+    };
+    return Class.prototype.constructor;
   };
 };
 

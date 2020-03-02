@@ -5,8 +5,8 @@ import {
   Generator,
   Named
 } from "./class";
-import Inject from "./inject";
-import resolve from "./resolve";
+import { Inject, InjectPrototype, InjectStatic } from "./inject";
+import { resolve } from "./resolve";
 import { register, registerLazily } from "./services";
 
 export {
@@ -16,6 +16,8 @@ export {
   GeneratorNamed,
   Named,
   Inject,
+  InjectPrototype,
+  InjectStatic,
   resolve,
   register,
   registerLazily

@@ -1,17 +1,52 @@
-import { resolveDependencies } from "./resolve";
+import { resolve, resolveDependencies } from "./resolve";
 
-export default function Inject(...names) {
+export const validateInjections = names =>
   names.forEach(name => {
     if (typeof name !== "string") {
       throw new Error(`Unexpected dependency ${name}`);
     }
   });
-  return Class => {
-    const constructor = (...args) =>
-      new Class(...args, ...resolveDependencies(constructor.prototype));
 
-    constructor.prototype.Dagger = true;
-    constructor.prototype.Dependencies = names;
-    return constructor;
+export const Inject = (...names) => {
+  validateInjections(names);
+  return Class => {
+    Class.constructorWithInjections = (...args) =>
+      new Class(
+        ...args,
+        ...resolveDependencies(
+          Class.constructorWithInjections.dagger.dependencies
+        )
+      );
+    Class.constructorWithInjections.dagger = {
+      name: Class.name,
+      dependencies: names
+    };
+    return Class.constructorWithInjections;
   };
-}
+};
+
+export const reduceDependenciesToObject = names =>
+  names.reduce((object, name) => {
+    object[name] = resolve(name);
+    return object;
+  }, {});
+
+export const assignDependencies = (target, names) =>
+  Object.assign(target, reduceDependenciesToObject(names));
+
+export const InjectPrototype = (...names) => {
+  validateInjections(names);
+  return Class => {
+    return (...args) => {
+      assignDependencies(Class.prototype, names);
+      return new Class(...args);
+    };
+  };
+};
+
+export const InjectStatic = (...names) => {
+  validateInjections(names);
+  return Class => {
+    assignDependencies(Class.prototype, names);
+  };
+};

@@ -115,5 +115,25 @@ describe("Inject Decorator", () => {
         class InvalidInjection {}
       }).toThrowError();
     });
+
+    it("on super constructors", () => {
+      @Provides
+      class A {}
+
+      @Inject("A")
+      class B extends A {
+        constructor(a) {
+          super();
+          this.a = a;
+        }
+      }
+
+      class C extends B {}
+      expect(() => new C()).not.toThrowError();
+      expect(new C().a).toEqual(new A());
+      // TODO: Fix
+      // expect(C.dagger).toBeUndefined();
+      expect(new C().dagger).toBeUndefined();
+    });
   });
 });

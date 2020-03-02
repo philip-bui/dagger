@@ -1,17 +1,11 @@
 import React from "react";
-import { resolve } from "..";
+import { validateInjections, reduceDependenciesToObject } from "../inject";
 
 export default function InjectProps(...names) {
-  names.forEach(name => {
-    if (typeof name !== "string") {
-      throw new Error(`Unexpected dependency ${name}`);
-    }
-  });
+  validateInjections(names);
   return WrappedComponent => props => {
-    const injections = {};
-    names.forEach(name => {
-      injections[name] = resolve(name);
-    });
-    return <WrappedComponent {...injections} {...props} />;
+    return (
+      <WrappedComponent {...reduceDependenciesToObject(names)} {...props} />
+    );
   };
 }

@@ -1,21 +1,16 @@
-import {
-  ProvidesNamed,
-  Provides,
-  GeneratorNamed,
-  Generator,
-  Named
-} from "./class";
-import Inject from "./inject";
-import resolve from "./resolve";
+import { singleton, singletonNamed, generator, generatorNamed } from "./class";
+import { inject, injectPrototype, injectStatic } from "./inject";
+import { resolve } from "./resolve";
 import { register, registerLazily } from "./services";
 
 export {
-  Provides,
-  ProvidesNamed,
-  Generator,
-  GeneratorNamed,
-  Named,
-  Inject,
+  singleton,
+  singletonNamed,
+  generator,
+  generatorNamed,
+  inject,
+  injectPrototype,
+  injectStatic,
   resolve,
   register,
   registerLazily

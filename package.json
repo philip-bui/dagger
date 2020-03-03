@@ -40,6 +40,7 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "eslint-config-react-native-lit": "^1.0.2",
+    "hoist-non-react-statics": "^3.3.2",
     "jest": "^25.1.0",
     "prettier": "^1.18.2",
     "react": "^16.11.0",
@@ -47,9 +48,11 @@
   },
   "peerDependencies": {
     "@babel/core": "*",
-    "@babel/plugin-proposal-class-properties": "*",
     "@babel/plugin-proposal-decorators": "*",
+    "@babel/plugin-proposal-class-properties": "*",
     "@babel/preset-env": "*",
+    "@babel/preset-react": "*",
+    "hoist-non-react-statics": "*",
     "react": "*"
   },
   "babel": {
@@ -71,10 +74,12 @@
     "extends": [
       "react-native-lit"
     ],
-
     "ecmaFeatures": {
       "experimentalDecorators": true,
       "legacyDecorators": true
+    },
+    "rules": {
+      "no-underscore-dangle": 0
     }
   },
   "jest": {

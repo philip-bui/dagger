@@ -1,4 +1,5 @@
 import { resolve, resolveDependencies } from "./resolve";
+import { assignMetadata } from "./services";
 
 export const validateInjections = names =>
   names.forEach(name => {
@@ -6,22 +7,6 @@ export const validateInjections = names =>
       throw new Error(`Unexpected dependency ${name}`);
     }
   });
-
-export const Inject = (...names) => {
-  validateInjections(names);
-  return Class => {
-    Class.prototype.constructor = (...args) =>
-      new Class(
-        ...args,
-        ...resolveDependencies(Class.prototype.constructor.dagger.dependencies)
-      );
-    Class.prototype.constructor.dagger = {
-      name: Class.name,
-      dependencies: names
-    };
-    return Class.prototype.constructor;
-  };
-};
 
 export const reduceDependenciesToObject = names =>
   names.reduce((object, name) => {
@@ -32,21 +17,44 @@ export const reduceDependenciesToObject = names =>
 export const assignDependencies = (target, names) =>
   Object.assign(target, reduceDependenciesToObject(names));
 
-export const InjectPrototype = (...names) => {
+export const assignProperties = Class =>
+  Object.keys(Class).forEach(key => {
+    Class.constructor[key] = Class[key];
+  });
+
+export const inject = (...names) => {
   validateInjections(names);
   return Class => {
-    Class.prototype.constructor = (...args) => {
-      assignDependencies(Class.prototype, names);
-      return new Class(...args);
-    };
-    Class.prototype.constructor.dagger = {
-      name: Class.name
-    };
-    return Class.prototype.constructor;
+    Class.constructor = (...args) =>
+      new Class(
+        ...args,
+        ...resolveDependencies(Class.constructor._dagger.dependencies)
+      );
+    assignProperties(Class);
+    assignMetadata(Class.constructor, {
+      name: Class.name,
+      dependencies: names
+    });
+    return Class.constructor;
   };
 };
 
-export const InjectStatic = (...names) => {
+export const injectPrototype = (...names) => {
+  validateInjections(names);
+  return Class => {
+    Class.constructor = (...args) => {
+      assignDependencies(Class.prototype, names);
+      return new Class(...args);
+    };
+    assignProperties(Class);
+    assignMetadata(Class.constructor, {
+      name: Class.name
+    });
+    return Class.constructor;
+  };
+};
+
+export const injectStatic = (...names) => {
   validateInjections(names);
   return Class => {
     assignDependencies(Class.prototype, names);

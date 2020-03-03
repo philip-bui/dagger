@@ -16,19 +16,20 @@ Dagger is a dependency injection container using Decorators.
 Dagger relies on the experimental [stage-0 decorators](https://github.com/tc39/proposal-decorators). 
 
 ```bash
-$ npm install dagger @babel/plugin-proposal-class-properties @babel/plugin-proposal-decorators
+$ npm install dagger-di 
+$ npm install @babel/plugin-proposal-decorators @babel/plugin-proposal-class-properties --save-dev
 ```
 
 ```bash
-$ yarn add dagger @babel/plugin-proposal-class-properties @babel/plugin-proposal-decorators
+$ yarn add dagger-di 
+$ yarn add -D @babel/plugin-proposal-decorators @babel/plugin-proposal-class-properties
 ```
 
 Turn on Decorators in Babel.
 
 ```javascript
-package.json
 {
-    ...
+    // React.
     "babel": {
         "presets": [
             "@babel/preset-env",
@@ -38,7 +39,22 @@ package.json
             [
                 "@babel/plugin-proposal-decorators",
                 {
-                "legacy": true
+                    "legacy": true
+                }
+            ],
+            "@babel/plugin-proposal-class-properties"
+        ]
+    }
+    // React-Native.
+    "babel": {
+        "presets": [
+            "module:metro-react-native-babel-preset"
+        ],
+        "plugins": [
+            [
+                "@babel/plugin-proposal-decorators", 
+                {
+                    "legacy": true 
                 }
             ],
             "@babel/plugin-proposal-class-properties"
@@ -55,8 +71,8 @@ package.json
     ...,
     "eslintConfig": {
         "ecmaFeatures": {
-        "experimentalDecorators": true,
-        "legacyDecorators": true
+            "experimentalDecorators": true,
+            "legacyDecorators": true
         }
     }
 }
@@ -65,21 +81,22 @@ package.json
 ## Usage
 
 ```javascript
-import { Provides } from "dagger";
+import { singleton } from "dagger-di";
 
-// Registers Foo with Singleton Foo.
-@Provides
+// Registers "Foo" with a singleton Foo.
+@singleton
 class Foo {
 
 }
 ```
 
 ```javascript
-import { Inject, GeneratorNamed } from "dagger";
+import { inject, generator } from "dagger";
 
-// Registers Bar with a Generator creating a new instance on every dependency needed.
-@GeneratorNamed("Bar")
-@Inject("Foo")
+// Registers "Bar" with a Generator creating 
+// a new instance for every injection of "Bar".
+@generator
+@inject("Foo")
 class Bar {
     constructor(foo) {
         this.foo = foo;
@@ -88,18 +105,20 @@ class Bar {
 ```
 
 ```javascript
-import { register, registerLazily, InjectProps } from "dagger";
-import from "./Foo"; // Loading the class will automatically inject from @Provides decorator.
+import { register, registerLazily } from "dagger-di";
+import { injectProps } from "dagger-di/src/react"
+// Load the module to load the singleton decorator.
+import from "./Foo"; 
 
-// Manually register an object, value etc.
-register("Bar", require("./Bar"));
+// Or manually register without decorators.
+register("BarTwo", require("./Bar"));
 
-// Manually register a lazy function to evaluate when dependency is needed.
+// Or register a lazy function to evaluate when it is used.
 registerLazily("LazyBar", () => require("./Bar"));
 
-// This will throw an error if any dependency keys haven't been registered. 
-// On FooBar construction, then Dagger will initialize the dependencies.
-@InjectProps("Foo", "Bar", "LazyBar")
+// Throws an error if any dependencies haven't been registered.
+// On construction, Dagger will inject the dependencies for you.
+@injectProps("Foo", "Bar", "LazyBar")
 class FooBar extends Component {
 
     render() {

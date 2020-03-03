@@ -1,4 +1,4 @@
-import services from "./services";
+import { services } from "./services";
 
 export const hasRegistered = name => services.hasOwnProperty(name);
 
@@ -6,10 +6,10 @@ export const resolve = name => {
   if (!hasRegistered(name)) {
     throw new Error(`${name} was not provided.`);
   }
-  if (!services[name] || !services[name].dagger) {
+  if (!services[name] || !services[name]._dagger) {
     return services[name];
   }
-  const { dagger } = services[name];
+  const { _dagger: dagger } = services[name];
   // eslint-disable-next-line no-use-before-define
   const injections = resolveDependencies(dagger.dependencies);
   if (dagger.generator) {
@@ -20,7 +20,7 @@ export const resolve = name => {
   }
   if (dagger.lazyLoad) {
     services[name] = services[name]();
-    if (services[name] && services[name].dagger) {
+    if (services[name] && services[name]._dagger) {
       // Could require injection of dependencies,
       // or generator or provider which needs resolving.
       services[name] = resolve(name);

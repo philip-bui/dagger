@@ -3,8 +3,8 @@ import {
   register,
   registerLazily,
   resolve,
-  Inject,
-  Provides
+  inject,
+  singleton
 } from "../src/index";
 
 describe("Services", () => {
@@ -102,10 +102,10 @@ describe("Services", () => {
     });
 
     it("class with dependencies", () => {
-      @Provides
+      @singleton
       class Foo {}
 
-      @Inject("Foo")
+      @inject("Foo")
       class Bar {
         constructor(foo) {
           this.foo = foo;

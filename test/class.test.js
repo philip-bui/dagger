@@ -1,12 +1,11 @@
 /* eslint-disable max-classes-per-file */
 import {
-  Provides,
-  ProvidesNamed,
-  Generator,
-  GeneratorNamed,
-  Named,
+  singleton,
+  singletonNamed,
+  generator,
+  generatorNamed,
   resolve,
-  Inject
+  inject
 } from "../src";
 
 describe("Class Decorator", () => {
@@ -16,7 +15,7 @@ describe("Class Decorator", () => {
         this.name = name;
       }
     }
-    @Provides
+    @singleton
     class Stranger extends Person {}
 
     it("with constructor arguments", () => {
@@ -29,8 +28,7 @@ describe("Class Decorator", () => {
 
     describe("named with", () => {
       describe("provided and named", () => {
-        @Provides
-        @Named("Philip")
+        @singletonNamed("Philip")
         class PhilipPerson extends Person {
           constructor(name = "Philip") {
             super(name);
@@ -50,9 +48,8 @@ describe("Class Decorator", () => {
         });
 
         describe("with injection", () => {
-          @Provides
-          @Named("PhilipWife")
-          @Inject("Philip")
+          @singletonNamed("PhilipWife")
+          @inject("Philip")
           class PhilipPartner extends Person {}
 
           it("with constructor arguments", () => {
@@ -73,7 +70,7 @@ describe("Class Decorator", () => {
       });
 
       describe("provides named", () => {
-        @ProvidesNamed("Terry")
+        @singletonNamed("Terry")
         class TerryPerson extends Person {
           constructor(name = "Terry") {
             super(name);
@@ -93,8 +90,8 @@ describe("Class Decorator", () => {
         });
 
         describe("with injection", () => {
-          @ProvidesNamed("TerryWife")
-          @Inject("Terry")
+          @singletonNamed("TerryWife")
+          @inject("Terry")
           class TerryPartner extends Person {}
 
           it("with constructor arguments", () => {
@@ -124,7 +121,7 @@ describe("Class Decorator", () => {
       }
     }
 
-    @Generator
+    @generator
     class UnknownCounter extends Counter {}
 
     it("with constructor arguments", () => {
@@ -149,8 +146,7 @@ describe("Class Decorator", () => {
     });
     describe("named with", () => {
       describe("provided and named", () => {
-        @Generator
-        @Named("PhilipCount")
+        @generatorNamed("PhilipCount")
         class PhilipCounter extends Counter {
           constructor(name = "Philip") {
             super(name);
@@ -177,7 +173,7 @@ describe("Class Decorator", () => {
       });
 
       describe("provides named", () => {
-        @GeneratorNamed("TerryCount")
+        @generatorNamed("TerryCount")
         class TerryCounter extends Counter {
           constructor(name = "Terry") {
             super(name);
@@ -205,8 +201,8 @@ describe("Class Decorator", () => {
     });
   });
   describe("generates named", () => {
-    @GeneratorNamed("John")
-    @Inject()
+    @generatorNamed("John")
+    @inject()
     class Person {
       constructor(name = "Unknown") {
         this.name = name;

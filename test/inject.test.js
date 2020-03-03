@@ -1,18 +1,18 @@
 /* eslint-disable max-classes-per-file */
 import {
-  Provides,
-  Inject,
-  InjectPrototype,
-  InjectStatic,
+  singleton,
+  inject,
+  injectPrototype,
+  injectStatic,
   register
 } from "../src";
 
-describe("Inject Decorator", () => {
+describe("inject Decorator", () => {
   describe("injects", () => {
     it("string", () => {
       register("String", "injectionOne");
 
-      @Inject("String")
+      @inject("String")
       class StringExample {
         constructor(argumentOne, injectionOne) {
           this.argumentOne = argumentOne;
@@ -28,7 +28,7 @@ describe("Inject Decorator", () => {
     it("null", () => {
       register("null", null);
 
-      @Inject("null")
+      @inject("null")
       class NullExample {
         constructor(argumentOne, injectionOne) {
           this.argumentOne = argumentOne;
@@ -45,7 +45,7 @@ describe("Inject Decorator", () => {
       const fn = () => {};
       register("Function", fn);
 
-      @Inject("Function")
+      @inject("Function")
       class FunctionExample {
         constructor(argumentOne, injectionOne) {
           this.argumentOne = argumentOne;
@@ -64,7 +64,7 @@ describe("Inject Decorator", () => {
       const fn = () => {};
       register("Function", fn);
 
-      @Inject("Number", "Undefined", "Function")
+      @inject("Number", "Undefined", "Function")
       class FunctionExample {
         constructor(argumentOne, injectionOne, injectionTwo, injectionThree) {
           this.argumentOne = argumentOne;
@@ -82,18 +82,18 @@ describe("Inject Decorator", () => {
     });
 
     it("nested dependencies", () => {
-      @Provides
-      @Inject("A")
+      @singleton
+      @inject("A")
       class B {
         constructor(a) {
           this.a = a;
         }
       }
 
-      @Provides
+      @singleton
       class A {}
 
-      @Inject("B", "A")
+      @inject("B", "A")
       class C {
         constructor(b, a) {
           this.b = b;
@@ -108,24 +108,24 @@ describe("Inject Decorator", () => {
     });
 
     it("no dependencies", () => {
-      @Inject()
+      @inject()
       class NoDependency {}
 
       expect(new NoDependency()).toBeDefined();
     });
     it("throws on invalid", () => {
       expect(() => {
-        @Inject
+        @inject
         // eslint-disable-next-line no-unused-vars
-        class InvalidInjection {}
+        class Invalidinjection {}
       }).toThrowError();
     });
 
     it("on super constructors", () => {
-      @Provides
+      @singleton
       class A {}
 
-      @Inject("A")
+      @inject("A")
       class B extends A {
         constructor(a) {
           super();
@@ -145,7 +145,7 @@ describe("Inject Decorator", () => {
     it("string", () => {
       register("String", "injectionOne");
 
-      @InjectPrototype("String")
+      @injectPrototype("String")
       class StringExample {
         constructor(argumentOne) {
           this.argumentOne = argumentOne;
@@ -162,7 +162,7 @@ describe("Inject Decorator", () => {
     it("null", () => {
       register("null", null);
 
-      @InjectPrototype("null")
+      @injectPrototype("null")
       class NullExample {
         constructor(argumentOne) {
           this.argumentOne = argumentOne;
@@ -179,7 +179,7 @@ describe("Inject Decorator", () => {
       const fn = () => {};
       register("Function", fn);
 
-      @InjectPrototype("Function")
+      @injectPrototype("Function")
       class FunctionExample {
         constructor(argumentOne) {
           this.argumentOne = argumentOne;
@@ -198,7 +198,7 @@ describe("Inject Decorator", () => {
       const fn = () => {};
       register("Function", fn);
 
-      @InjectPrototype("Number", "Undefined", "Function")
+      @injectPrototype("Number", "Undefined", "Function")
       class FunctionExample {
         constructor(argumentOne) {
           this.argumentOne = argumentOne;
@@ -217,14 +217,14 @@ describe("Inject Decorator", () => {
     });
 
     it("nested dependencies", () => {
-      @Provides
-      @InjectPrototype("A")
+      @singleton
+      @injectPrototype("A")
       class B {}
 
-      @Provides
+      @singleton
       class A {}
 
-      @InjectPrototype("B", "A")
+      @injectPrototype("B", "A")
       class C {}
 
       expect(C.prototype.C).toBeUndefined();
@@ -238,24 +238,24 @@ describe("Inject Decorator", () => {
     });
 
     it("no dependencies", () => {
-      @InjectPrototype()
+      @injectPrototype()
       class NoDependency {}
 
       expect(new NoDependency()).toBeDefined();
     });
     it("throws on invalid", () => {
       expect(() => {
-        @InjectPrototype
+        @injectPrototype
         // eslint-disable-next-line no-unused-vars
-        class InvalidInjection {}
+        class Invalidinjection {}
       }).toThrowError();
     });
 
     it("on super constructors", () => {
-      @Provides
+      @singleton
       class A {}
 
-      @InjectPrototype("A")
+      @injectPrototype("A")
       class B extends A {}
 
       class C extends B {}
@@ -271,7 +271,7 @@ describe("Inject Decorator", () => {
     it("string", () => {
       register("String", "injectionOne");
 
-      @InjectStatic("String")
+      @injectStatic("String")
       class StringExample {
         constructor(argumentOne) {
           this.argumentOne = argumentOne;
@@ -287,7 +287,7 @@ describe("Inject Decorator", () => {
     it("null", () => {
       register("null", null);
 
-      @InjectStatic("null")
+      @injectStatic("null")
       class NullExample {
         constructor(argumentOne) {
           this.argumentOne = argumentOne;
@@ -304,7 +304,7 @@ describe("Inject Decorator", () => {
       const fn = () => {};
       register("Function", fn);
 
-      @InjectStatic("Function")
+      @injectStatic("Function")
       class FunctionExample {
         constructor(argumentOne) {
           this.argumentOne = argumentOne;
@@ -323,7 +323,7 @@ describe("Inject Decorator", () => {
       const fn = () => {};
       register("Function", fn);
 
-      @InjectStatic("Number", "Undefined", "Function")
+      @injectStatic("Number", "Undefined", "Function")
       class FunctionExample {
         constructor(argumentOne) {
           this.argumentOne = argumentOne;
@@ -342,14 +342,14 @@ describe("Inject Decorator", () => {
     });
 
     it("nested dependencies", () => {
-      @Provides
-      @InjectStatic("A")
+      @singleton
+      @injectStatic("A")
       class B {}
 
-      @Provides
+      @singleton
       class A {}
 
-      @InjectStatic("B", "A")
+      @injectStatic("B", "A")
       class C {}
 
       expect(C.prototype.A).toEqual(new A());
@@ -363,24 +363,24 @@ describe("Inject Decorator", () => {
     });
 
     it("no dependencies", () => {
-      @InjectStatic()
+      @injectStatic()
       class NoDependency {}
 
       expect(new NoDependency()).toBeDefined();
     });
     it("throws on invalid", () => {
       expect(() => {
-        @InjectStatic
+        @injectStatic
         // eslint-disable-next-line no-unused-vars
-        class InvalidInjection {}
+        class Invalidinjection {}
       }).toThrowError();
     });
 
     it("on super constructors", () => {
-      @Provides
+      @singleton
       class A {}
 
-      @InjectStatic("A")
+      @injectStatic("A")
       class B extends A {}
 
       class C extends B {}

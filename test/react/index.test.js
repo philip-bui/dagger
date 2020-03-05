@@ -57,5 +57,22 @@ describe("React", () => {
         bar: "bar"
       });
     });
+
+    describe("displayName", () => {
+      it("gets injected", () => {
+        FunctionalComponent.displayName = "abc";
+        const instance = injectProps("Foo")(FunctionalComponent);
+        expect(instance.displayName).toEqual("Injected.abc");
+      });
+
+      it("defaults to Component", () => {
+        FunctionalComponent.displayName = "";
+        Object.defineProperty(FunctionalComponent, "name", {
+          value: ""
+        });
+        const instance = injectProps("Foo")(FunctionalComponent);
+        expect(instance.displayName).toEqual("Injected.Component");
+      });
+    });
   });
 });

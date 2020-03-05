@@ -2,10 +2,13 @@
 import {
   register,
   registerLazily,
+  registerModule,
   resolve,
   inject,
   singleton
 } from "../src/index";
+
+import { a, b } from "./module";
 
 describe("Services", () => {
   describe("registers", () => {
@@ -123,6 +126,23 @@ describe("Services", () => {
       expect(() =>
         registerLazily("Error", "Not expecting a non-function here")
       ).toThrowError();
+    });
+
+    it("throws on duplicate", () => {
+      expect(() => resolve("duplicate")).toThrowError();
+      register("duplicate", "dupe", false);
+      expect(() => register("duplicate", "dupe", false)).toThrowError();
+      expect(resolve("duplicate")).toEqual("dupe");
+    });
+  });
+  describe("register module", () => {
+    it("functions", () => {
+      expect(() => resolve("a")).toThrowError();
+      expect(() => resolve("b")).toThrowError();
+      // eslint-disable-next-line global-require
+      registerModule(require("./module"));
+      expect(resolve("a")).toEqual(a);
+      expect(resolve("b")).toEqual(b);
     });
   });
 });

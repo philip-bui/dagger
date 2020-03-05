@@ -1,7 +1,7 @@
 import { singleton, singletonNamed, generator, generatorNamed } from "./class";
 import { inject, injectPrototype, injectStatic } from "./inject";
 import { resolve } from "./resolve";
-import { register, registerLazily } from "./services";
+import { register, registerLazily, registerModule } from "./services";
 
 export {
   singleton,
@@ -13,5 +13,6 @@ export {
   injectStatic,
   resolve,
   register,
-  registerLazily
+  registerLazily,
+  registerModule
 };

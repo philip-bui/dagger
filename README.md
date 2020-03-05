@@ -105,7 +105,15 @@ class Bar {
 ```
 
 ```javascript
-import { register, registerLazily } from "dagger-di";
+export const warrior = () => {};
+
+export const ninja = () => {};
+
+export const archer = () => {};
+```
+
+```javascript
+import { register, registerLazily, registerModule } from "dagger-di";
 import { injectProps } from "dagger-di/src/react"
 // Load the module to load the singleton decorator.
 import from "./Foo"; 
@@ -116,13 +124,16 @@ register("BarTwo", require("./Bar"));
 // Or register a lazy function to evaluate when it is used.
 registerLazily("LazyBar", () => require("./Bar"));
 
+// Or register all exports within a module.
+registerModule(require("./module"));
+
 // Throws an error if any dependencies haven't been registered.
 // On construction, Dagger will inject the dependencies for you.
-@injectProps("Foo", "Bar", "LazyBar")
+@injectProps("Foo", "Bar", "LazyBar", "warrior", "ninja")
 class FooBar extends Component {
 
     render() {
-        const { Foo, Bar, LazyBar } = this.props;
+        const { Foo, Bar, LazyBar, warrior, ninja } = this.props;
     }
 }
 ```

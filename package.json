@@ -1,6 +1,6 @@
 {
   "name": "dagger-di",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Dagger Dependency Injection",
   "main": "src/index.js",
   "scripts": {

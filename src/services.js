@@ -15,6 +15,9 @@ export const register = (name, service, override = NODE_ENV === "test") => {
 
 export function registerModule(module) {
   Object.entries(module).forEach(([key, value]) => {
+    if (key === "default") {
+      return;
+    }
     register(key, value);
   });
 }

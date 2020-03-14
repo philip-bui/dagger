@@ -1,9 +1,14 @@
-import { singleton, singletonNamed, generator, generatorNamed } from "./class";
-import { inject, injectPrototype, injectStatic } from "./inject";
-import { resolve } from "./resolve";
-import { register, registerLazily, registerModule } from "./services";
+const {
+  singleton,
+  singletonNamed,
+  generator,
+  generatorNamed
+} = require("./class");
+const { inject, injectPrototype, injectStatic } = require("./inject");
+const { resolve } = require("./resolve");
+const { register, registerLazily, registerModule } = require("./services");
 
-export {
+module.exports = {
   singleton,
   singletonNamed,
   generator,

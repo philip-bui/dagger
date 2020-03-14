@@ -1,28 +1,28 @@
-import { resolve, resolveDependencies } from "./resolve";
-import { assignMetadata } from "./services";
+const { resolve, resolveDependencies } = require("./resolve");
+const { assignMetadata } = require("./services");
 
-export const validateInjections = names =>
+const validateInjections = names =>
   names.forEach(name => {
     if (typeof name !== "string") {
       throw new Error(`Unexpected dependency ${name}`);
     }
   });
 
-export const reduceDependenciesToObject = names =>
+const reduceDependenciesToObject = names =>
   names.reduce((object, name) => {
     object[name] = resolve(name);
     return object;
   }, {});
 
-export const assignDependencies = (target, names) =>
+const assignDependencies = (target, names) =>
   Object.assign(target, reduceDependenciesToObject(names));
 
-export const assignProperties = Class =>
+const assignProperties = Class =>
   Object.keys(Class).forEach(key => {
     Class.constructor[key] = Class[key];
   });
 
-export const inject = (...names) => {
+const inject = (...names) => {
   validateInjections(names);
   return Class => {
     Class.constructor = (...args) =>
@@ -39,7 +39,7 @@ export const inject = (...names) => {
   };
 };
 
-export const injectPrototype = (...names) => {
+const injectPrototype = (...names) => {
   validateInjections(names);
   return Class => {
     Class.constructor = (...args) => {
@@ -54,9 +54,19 @@ export const injectPrototype = (...names) => {
   };
 };
 
-export const injectStatic = (...names) => {
+const injectStatic = (...names) => {
   validateInjections(names);
   return Class => {
     assignDependencies(Class.prototype, names);
   };
 };
+
+module.exports = {
+  validateInjections,
+  reduceDependenciesToObject,
+  assignDependencies,
+  assignProperties,
+  inject,
+  injectPrototype,
+  injectStatic
+}

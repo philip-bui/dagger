@@ -1,8 +1,8 @@
-import { services } from "./services";
+const { services } = require("./services");
 
-export const hasRegistered = name => services.hasOwnProperty(name);
+const hasRegistered = name => services.hasOwnProperty(name);
 
-export const resolve = name => {
+const resolve = name => {
   if (!hasRegistered(name)) {
     throw new Error(`${name} was not provided.`);
   }
@@ -29,5 +29,11 @@ export const resolve = name => {
   return services[name];
 };
 
-export const resolveDependencies = dependencies =>
+const resolveDependencies = dependencies =>
   (dependencies || []).map(dependency => resolve(dependency));
+
+  module.exports = {
+    hasRegistered,
+    resolve,
+    resolveDependencies
+  };

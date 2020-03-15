@@ -2,7 +2,7 @@ const services = {};
 
 const { NODE_ENV } = process.env;
 
-const assignMetadata = (service, source) => {
+const assignDaggerProperties = (service, source) => {
   service._dagger = Object.assign(service._dagger || {}, source);
 };
 
@@ -24,9 +24,9 @@ const registerModule = module => {
 
 const registerLazily = (name, service) => {
   if (typeof service !== "function") {
-    throw new Error("Invalid service, expected function to lazy load");
+    throw new Error("Invalid service, expected a function");
   }
-  assignMetadata(service, {
+  assignDaggerProperties(service, {
     lazyLoad: true
   });
   register(name, service);
@@ -34,7 +34,7 @@ const registerLazily = (name, service) => {
 
 module.exports = {
   services,
-  assignMetadata,
+  assignDaggerProperties,
   register,
   registerModule,
   registerLazily

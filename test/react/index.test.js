@@ -13,64 +13,72 @@ describe("React", () => {
   class Foo {
     foo = "foo";
   }
-  describe("class components", () => {
-    @injectProps("Foo")
-    class Bar extends PureComponent {
-      render() {
-        return <div />;
+
+  describe.each([
+    [
+      "class components",
+      class Bar extends PureComponent {
+        render() {
+          const { foo, bar } = this.props;
+          return (
+            <div>
+              {foo.foo}
+              {bar}
+            </div>
+          );
+        }
       }
-    }
+    ],
+    [
+      "functional components",
+      ({ props: { foo, bar } }) => (
+        <div>
+          {foo.foo}
+          {bar}
+        </div>
+      )
+    ]
+  ])("%s", (_, Bar) => {
     it("injects with props", () => {
-      const ref = React.createRef();
-      const instance = shallow(<Bar bar="bar" ref={ref} />);
+      const DecoratedBar = injectProps("Foo")(Bar);
+      const instance = shallow(<DecoratedBar bar="bar" />);
       expect(instance).toBeDefined();
-      expect(instance.props()).toEqual({
-        Foo: new Foo(),
-        bar: "bar"
-      });
+      expect(instance.props().Foo).toEqual(new Foo());
+      expect(instance.props().bar).toEqual("bar");
     });
-
     it("no dependencies", () => {
-      @injectProps()
-      class NoInjection {}
-
-      expect(new NoInjection()).toBeDefined();
+      expect(injectProps()(Bar)).toBeDefined();
     });
-    it("throws on invalid", () => {
-      expect(() => {
-        @injectProps
-        // eslint-disable-next-line no-unused-vars
-        class InvalidInjection extends React.Component {}
-      }).toThrowError();
+    it("throws on invalid invocation", () => {
+      expect(() => injectProps(Bar)).toThrowError();
     });
+  });
+  describe("class components", () => {
+    // @injectProps("Foo")
+    // class Bar extends PureComponent {
+    //   render() {
+    //     return <div />;
+    //   }
+    // }
+    it.todo("injects with ref");
   });
 
   describe("functional components", () => {
-    const FunctionalComponent = () => <div />;
-    const Bar = injectProps("Foo")(FunctionalComponent);
-
-    it("injects with props", () => {
-      const instance = shallow(<Bar bar="bar" />);
-      expect(instance).toBeDefined();
-      expect(instance.props()).toEqual({
-        Foo: new Foo(),
-        bar: "bar"
-      });
-    });
+    const Bar = () => <div />;
 
     describe("displayName", () => {
       it("gets injected", () => {
-        FunctionalComponent.displayName = "abc";
-        const instance = injectProps("Foo")(FunctionalComponent);
+        Bar.displayName = "abc";
+        const instance = injectProps("Foo")(Bar);
         expect(instance.displayName).toEqual("Injected.abc");
       });
 
       it("defaults to Component", () => {
-        FunctionalComponent.displayName = "";
-        Object.defineProperty(FunctionalComponent, "name", {
+        Bar.displayName = "";
+        Object.defineProperty(Bar, "name", {
           value: ""
         });
-        const instance = injectProps("Foo")(FunctionalComponent);
+        const instance = injectProps("Foo")(Bar);
         expect(instance.displayName).toEqual("Injected.Component");
       });
     });

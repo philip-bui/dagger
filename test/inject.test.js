@@ -3,393 +3,147 @@ import {
   singleton,
   inject,
   injectPrototype,
-  injectStatic,
+  injectPrototypeDynamic,
   register
 } from "../src";
+import { TestDataTypes } from "./test-data";
 
-describe("inject Decorator", () => {
-  describe("injects", () => {
-    it("string", () => {
-      register("String", "injectionOne");
-
-      @inject("String")
-      class StringExample {
-        constructor(argumentOne, injectionOne) {
-          this.argumentOne = argumentOne;
-          this.injectionOne = injectionOne;
+describe("inject", () => {
+  describe.each([
+    ["injects", inject],
+    ["injectsPrototype", injectPrototype],
+    ["injectsPrototypeDynamic", injectPrototypeDynamic]
+  ])("%s", (_, decorator) => {
+    it.each(TestDataTypes)("%s", (key, service) => {
+      register(key, service);
+      @inject(key)
+      class Example {
+        constructor(argument, injection) {
+          this.argument = argument;
+          if (injection !== undefined) {
+            this[key] = injection;
+          }
         }
       }
 
-      const instance = new StringExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.injectionOne).toEqual("injectionOne");
-    });
-
-    it("null", () => {
-      register("null", null);
-
-      @inject("null")
-      class NullExample {
-        constructor(argumentOne, injectionOne) {
-          this.argumentOne = argumentOne;
-          this.injectionOne = injectionOne;
-        }
-      }
-
-      const instance = new NullExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.injectionOne).toEqual(null);
-    });
-
-    it("functions", () => {
-      const fn = () => {};
-      register("Function", fn);
-
-      @inject("Function")
-      class FunctionExample {
-        constructor(argumentOne, injectionOne) {
-          this.argumentOne = argumentOne;
-          this.injectionOne = injectionOne;
-        }
-      }
-
-      const instance = new FunctionExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.injectionOne).toEqual(fn);
-    });
-
-    it("multi-injections", () => {
-      register("Number", 0.1);
-      register("Undefined", undefined);
-      const fn = () => {};
-      register("Function", fn);
-
-      @inject("Number", "Undefined", "Function")
-      class FunctionExample {
-        constructor(argumentOne, injectionOne, injectionTwo, injectionThree) {
-          this.argumentOne = argumentOne;
-          this.injectionOne = injectionOne;
-          this.injectionTwo = injectionTwo;
-          this.injectionThree = injectionThree;
-        }
-      }
-
-      const instance = new FunctionExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.injectionOne).toEqual(0.1);
-      expect(instance.injectionTwo).toBeUndefined();
-      expect(instance.injectionThree).toEqual(fn);
-    });
-
-    it("nested dependencies", () => {
-      @singleton
-      @inject("A")
-      class B {
-        constructor(a) {
-          this.a = a;
-        }
-      }
-
-      @singleton
-      class A {}
-
-      @inject("B", "A")
-      class C {
-        constructor(b, a) {
-          this.b = b;
-          this.a = a;
-        }
-      }
-
-      const instance = new C();
-      expect(instance.b).toEqual(new B());
-      expect(instance.a).toEqual(new A());
-      expect(instance.b.a).toEqual(new A());
+      const instance = new Example("argument");
+      expect(instance.argument).toEqual("argument");
+      expect(instance[key]).toEqual(service);
     });
 
     it("no dependencies", () => {
-      @inject()
+      @decorator()
       class NoDependency {}
 
       expect(new NoDependency()).toBeDefined();
     });
     it("throws on invalid", () => {
       expect(() => {
-        @inject
+        @decorator
         // eslint-disable-next-line no-unused-vars
         class Invalidinjection {}
       }).toThrowError();
     });
+    it("injects multiple", () => {
+      register("InjectionOne", undefined);
+      const fn = jest.fn();
+      register("InjectionTwo", fn);
 
-    it("on super constructors", () => {
+      @decorator("InjectionOne", "InjectionTwo")
+      class Example {
+        constructor(argument, InjectionOne, InjectionTwo) {
+          this.argument = argument;
+          if (InjectionOne || InjectionTwo) {
+            this.InjectionOne = InjectionOne;
+            this.InjectionTwo = InjectionTwo;
+          }
+        }
+      }
+
+      const instance = new Example("argument");
+      expect(instance.argument).toEqual("argument");
+      expect(instance.InjectionOne).toBeUndefined();
+      expect(instance.InjectionTwo).toEqual(fn);
+    });
+
+    it("nested dependencies", () => {
+      @singleton
+      @decorator("B")
+      class A {
+        constructor(B) {
+          if (B) {
+            this.B = B;
+          }
+        }
+      }
+
+      @singleton
+      class B {}
+
+      @decorator("A", "B")
+      class C {
+        // eslint-disable-next-line no-shadow
+        constructor(argument, A, B) {
+          this.argument = argument;
+          if (A && B) {
+            this.A = A;
+            this.B = B;
+          }
+        }
+      }
+
+      const instance = new C("argument");
+      expect(instance.argument).toEqual("argument");
+      expect(instance.A).toEqual(new A());
+      expect(instance.B).toEqual(new B());
+      expect(instance.A.B).toEqual(new B());
+    });
+
+    it("injects on super parents", () => {
       @singleton
       class A {}
 
       @inject("A")
       class B extends A {
-        constructor(a) {
+        // eslint-disable-next-line no-shadow
+        constructor(argument, A) {
           super();
-          this.a = a;
+          this.argument = argument;
+          if (A) {
+            this.A = A;
+          }
         }
       }
 
       class C extends B {}
-      expect(() => new C()).not.toThrowError();
-      expect(new C().a).toEqual(new A());
-      // TODO: Fix
-      // expect(C.dagger).toBeUndefined();
-      expect(new C().dagger).toBeUndefined();
+      const instance = new C("argument");
+      expect(instance.argument).toEqual("argument");
+      expect(instance.A).toEqual(new A());
     });
   });
-  describe("injects prototype", () => {
-    it("string", () => {
-      register("String", "injectionOne");
 
-      @injectPrototype("String")
-      class StringExample {
-        constructor(argumentOne) {
-          this.argumentOne = argumentOne;
+  describe("injectsPrototypeDynamic", () => {
+    it("dynamic values that auto-update to latest value", () => {
+      register("Dynamic", "abc");
+
+      @injectPrototypeDynamic("Dynamic")
+      class A {
+        constructor(argument) {
+          this.argument = argument;
         }
       }
 
-      expect(StringExample.prototype.String).toBeUndefined();
-      expect(StringExample.prototype.String).toBeUndefined();
-      const instance = new StringExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.String).toEqual("injectionOne");
-    });
+      const instanceOne = new A(1);
+      expect(instanceOne.argument).toEqual(1);
+      expect(instanceOne.Dynamic).toEqual("abc");
 
-    it("null", () => {
-      register("null", null);
+      register("Dynamic", 123);
+      expect(instanceOne.argument).toEqual(1);
+      expect(instanceOne.Dynamic).toEqual(123);
 
-      @injectPrototype("null")
-      class NullExample {
-        constructor(argumentOne) {
-          this.argumentOne = argumentOne;
-        }
-      }
-
-      expect(NullExample.prototype.null).toBeUndefined();
-      const instance = new NullExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.null).toEqual(null);
-    });
-
-    it("functions", () => {
-      const fn = () => {};
-      register("Function", fn);
-
-      @injectPrototype("Function")
-      class FunctionExample {
-        constructor(argumentOne) {
-          this.argumentOne = argumentOne;
-        }
-      }
-
-      expect(FunctionExample.prototype.Function).toBeUndefined();
-      const instance = new FunctionExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.Function).toEqual(fn);
-    });
-
-    it("multi-injections", () => {
-      register("Number", 0.1);
-      register("Undefined", undefined);
-      const fn = () => {};
-      register("Function", fn);
-
-      @injectPrototype("Number", "Undefined", "Function")
-      class FunctionExample {
-        constructor(argumentOne) {
-          this.argumentOne = argumentOne;
-        }
-      }
-
-      expect(FunctionExample.prototype.Number).toBeUndefined();
-      expect(FunctionExample.prototype.Undefined).toBeUndefined();
-      expect(FunctionExample.prototype.Function).toBeUndefined();
-
-      const instance = new FunctionExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.Number).toEqual(0.1);
-      expect(instance.Undefined).toBeUndefined();
-      expect(instance.Function).toEqual(fn);
-    });
-
-    it("nested dependencies", () => {
-      @singleton
-      @injectPrototype("A")
-      class B {}
-
-      @singleton
-      class A {}
-
-      @injectPrototype("B", "A")
-      class C {}
-
-      expect(C.prototype.C).toBeUndefined();
-      expect(C.prototype.Undefined).toBeUndefined();
-      expect(C.prototype.Function).toBeUndefined();
-
-      const instance = new C();
-      expect(instance.B).toEqual(new B());
-      expect(instance.A).toEqual(new A());
-      expect(instance.B.A).toEqual(new A());
-    });
-
-    it("no dependencies", () => {
-      @injectPrototype()
-      class NoDependency {}
-
-      expect(new NoDependency()).toBeDefined();
-    });
-    it("throws on invalid", () => {
-      expect(() => {
-        @injectPrototype
-        // eslint-disable-next-line no-unused-vars
-        class Invalidinjection {}
-      }).toThrowError();
-    });
-
-    it("on super constructors", () => {
-      @singleton
-      class A {}
-
-      @injectPrototype("A")
-      class B extends A {}
-
-      class C extends B {}
-      expect(C.prototype.A).toBeUndefined();
-      expect(() => new C()).not.toThrowError();
-      expect(new C().A).toEqual(new A());
-      // TODO: Fix
-      // expect(C.dagger).toBeUndefined();
-      expect(new C().dagger).toBeUndefined();
-    });
-  });
-  describe("injects static", () => {
-    it("string", () => {
-      register("String", "injectionOne");
-
-      @injectStatic("String")
-      class StringExample {
-        constructor(argumentOne) {
-          this.argumentOne = argumentOne;
-        }
-      }
-
-      expect(StringExample.prototype.String).toEqual("injectionOne");
-      const instance = new StringExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.String).toEqual("injectionOne");
-    });
-
-    it("null", () => {
-      register("null", null);
-
-      @injectStatic("null")
-      class NullExample {
-        constructor(argumentOne) {
-          this.argumentOne = argumentOne;
-        }
-      }
-
-      expect(NullExample.prototype.null).toBeNull();
-      const instance = new NullExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.null).toEqual(null);
-    });
-
-    it("functions", () => {
-      const fn = () => {};
-      register("Function", fn);
-
-      @injectStatic("Function")
-      class FunctionExample {
-        constructor(argumentOne) {
-          this.argumentOne = argumentOne;
-        }
-      }
-
-      expect(FunctionExample.prototype.Function).toEqual(fn);
-      const instance = new FunctionExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.Function).toEqual(fn);
-    });
-
-    it("multi-injections", () => {
-      register("Number", 0.1);
-      register("Undefined", undefined);
-      const fn = () => {};
-      register("Function", fn);
-
-      @injectStatic("Number", "Undefined", "Function")
-      class FunctionExample {
-        constructor(argumentOne) {
-          this.argumentOne = argumentOne;
-        }
-      }
-
-      expect(FunctionExample.prototype.Number).toEqual(0.1);
-      expect(FunctionExample.prototype.Undefined).toBeUndefined();
-      expect(FunctionExample.prototype.Function).toEqual(fn);
-
-      const instance = new FunctionExample("argumentOne");
-      expect(instance.argumentOne).toEqual("argumentOne");
-      expect(instance.Number).toEqual(0.1);
-      expect(instance.Undefined).toBeUndefined();
-      expect(instance.Function).toEqual(fn);
-    });
-
-    it("nested dependencies", () => {
-      @singleton
-      @injectStatic("A")
-      class B {}
-
-      @singleton
-      class A {}
-
-      @injectStatic("B", "A")
-      class C {}
-
-      expect(C.prototype.A).toEqual(new A());
-      expect(C.prototype.B).toEqual(new B());
-      expect(C.prototype.B.A).toEqual(new A());
-
-      const instance = new C();
-      expect(instance.B).toEqual(new B());
-      expect(instance.A).toEqual(new A());
-      expect(instance.B.A).toEqual(new A());
-    });
-
-    it("no dependencies", () => {
-      @injectStatic()
-      class NoDependency {}
-
-      expect(new NoDependency()).toBeDefined();
-    });
-    it("throws on invalid", () => {
-      expect(() => {
-        @injectStatic
-        // eslint-disable-next-line no-unused-vars
-        class Invalidinjection {}
-      }).toThrowError();
-    });
-
-    it("on super constructors", () => {
-      @singleton
-      class A {}
-
-      @injectStatic("A")
-      class B extends A {}
-
-      class C extends B {}
-      expect(C.prototype.A).toEqual(new A());
-      expect(() => new C()).not.toThrowError();
-      expect(new C().A).toEqual(new A());
-      // TODO: Fix
-      // expect(C.dagger).toBeUndefined();
-      expect(new C().dagger).toBeUndefined();
+      const instanceTwo = new A(2);
+      expect(instanceTwo.argument).toEqual(2);
+      expect(instanceTwo.Dynamic).toEqual(123);
     });
   });
 });

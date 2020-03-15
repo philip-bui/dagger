@@ -1,11 +1,11 @@
-import React from "react";
-import hoistNonReactStatics from "hoist-non-react-statics";
-import { validateInjections, reduceDependenciesToObject } from "../inject";
+const React = require("react");
+const hoistNonReactStatics = require("hoist-non-react-statics");
+const { validateInjections, reduceDependenciesToObject } = require("../inject");
 
-export const isClassComponent = Component =>
+const isClassComponent = Component =>
   Boolean(Component.prototype && Component.prototype.isReactComponent);
 
-export const injectProps = (...names) => {
+const injectProps = (...names) => {
   validateInjections(names);
   return WrappedComponent => {
     const name = `Injected.${WrappedComponent.displayName ||
@@ -33,4 +33,9 @@ export const injectProps = (...names) => {
     InjectedComponent.displayName = name;
     return InjectedComponent;
   };
+};
+
+module.exports = {
+  isClassComponent,
+  injectProps
 };

@@ -1,21 +1,28 @@
-import { assignMetadata, register } from "./services";
+const { assignMetadata, register } = require("./services");
 
-export const singleton = Class => {
+const singleton = Class => {
   assignMetadata(Class, { provides: true });
   register(Class._dagger.name || Class.name, Class);
 };
 
-export const singletonNamed = name => Class => {
+const singletonNamed = name => Class => {
   assignMetadata(Class, { name });
   singleton(Class);
 };
 
-export const generator = Class => {
+const generator = Class => {
   assignMetadata(Class, { generator: true });
   register(Class._dagger.name || Class.name, Class);
 };
 
-export const generatorNamed = name => Class => {
+const generatorNamed = name => Class => {
   assignMetadata(Class, { name });
   generator(Class);
+};
+
+module.exports = {
+  singleton,
+  singletonNamed,
+  generator,
+  generatorNamed
 };

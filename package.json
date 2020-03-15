@@ -44,12 +44,13 @@
     "jest": "^25.1.0",
     "prettier": "^1.18.2",
     "react": "^16.11.0",
-    "react-dom": "^16.13.0"
+    "react-dom": "^16.13.0",
+    "react-test-renderer": "^16.13.0"
   },
   "peerDependencies": {
     "@babel/core": "*",
-    "@babel/plugin-proposal-decorators": "*",
     "@babel/plugin-proposal-class-properties": "*",
+    "@babel/plugin-proposal-decorators": "*",
     "@babel/preset-env": "*",
     "@babel/preset-react": "*",
     "hoist-non-react-statics": "*",
@@ -74,10 +75,6 @@
     "extends": [
       "react-native-lit"
     ],
-    "ecmaFeatures": {
-      "experimentalDecorators": true,
-      "legacyDecorators": true
-    },
     "rules": {
       "no-underscore-dangle": 0
     }

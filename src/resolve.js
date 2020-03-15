@@ -32,8 +32,8 @@ const resolve = name => {
 const resolveDependencies = dependencies =>
   (dependencies || []).map(dependency => resolve(dependency));
 
-  module.exports = {
-    hasRegistered,
-    resolve,
-    resolveDependencies
-  };
+module.exports = {
+  hasRegistered,
+  resolve,
+  resolveDependencies
+};

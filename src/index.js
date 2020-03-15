@@ -1,5 +1,10 @@
-const { singleton, singletonNamed, generator, generatorNamed } = require("./class");
-const { inject, injectPrototype, injectStatic } = require("./inject");
+const {
+  singleton,
+  singletonNamed,
+  generator,
+  generatorNamed
+} = require("./class");
+const { inject, injectPrototype, injectPrototypeDynamic } = require("./inject");
 const { resolve } = require("./resolve");
 const { register, registerLazily, registerModule } = require("./services");
 
@@ -10,7 +15,7 @@ module.exports = {
   generatorNamed,
   inject,
   injectPrototype,
-  injectStatic,
+  injectPrototypeDynamic,
   resolve,
   register,
   registerLazily,

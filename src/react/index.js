@@ -38,4 +38,4 @@ const injectProps = (...names) => {
 module.exports = {
   isClassComponent,
   injectProps
-}
+};

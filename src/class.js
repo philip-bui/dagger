@@ -1,22 +1,22 @@
-const { assignMetadata, register } = require("./services");
+const { assignDaggerProperties, register } = require("./services");
 
 const singleton = Class => {
-  assignMetadata(Class, { provides: true });
+  assignDaggerProperties(Class, { provides: true });
   register(Class._dagger.name || Class.name, Class);
 };
 
 const singletonNamed = name => Class => {
-  assignMetadata(Class, { name });
+  assignDaggerProperties(Class, { name });
   singleton(Class);
 };
 
 const generator = Class => {
-  assignMetadata(Class, { generator: true });
+  assignDaggerProperties(Class, { generator: true });
   register(Class._dagger.name || Class.name, Class);
 };
 
 const generatorNamed = name => Class => {
-  assignMetadata(Class, { name });
+  assignDaggerProperties(Class, { name });
   generator(Class);
 };
 

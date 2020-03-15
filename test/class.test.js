@@ -9,208 +9,87 @@ import {
 } from "../src";
 
 describe("Class Decorator", () => {
-  describe("provides", () => {
-    class Person {
-      constructor(name = "Unknown") {
-        this.name = name;
-      }
+  class Person {
+    constructor(name = "Unknown") {
+      this.name = name;
     }
-    @singleton
-    class Stranger extends Person {}
+  }
 
-    it("with constructor arguments", () => {
-      expect(new Stranger("John").name).toEqual("John");
-    });
+  describe.each([["singleton", singleton], ["generator", generator]])(
+    "%s",
+    (_, decorator) => {
+      @decorator
+      class Stranger extends Person {}
 
-    it("with class name", () => {
-      expect(resolve("Stranger")).toEqual({ name: "Unknown" });
-    });
-
-    describe("named with", () => {
-      describe("provided and named", () => {
-        @singletonNamed("Philip")
-        class PhilipPerson extends Person {
-          constructor(name = "Philip") {
-            super(name);
-          }
-        }
-
-        it("with constructor arguments", () => {
-          expect(new PhilipPerson("philip").name).toEqual("philip");
-        });
-
-        it("custom name", () => {
-          expect(resolve("Philip")).toEqual({ name: "Philip" });
-        });
-
-        it("custom name excluding default class name", () => {
-          expect(() => resolve("PhilipPerson")).toThrowError();
-        });
-
-        describe("with injection", () => {
-          @singletonNamed("PhilipWife")
-          @inject("Philip")
-          class PhilipPartner extends Person {}
-
-          it("with constructor arguments", () => {
-            expect(new PhilipPartner("Philip Wife").name).toEqual(
-              "Philip Wife"
-            );
-          });
-
-          it("custom name", () => {
-            expect(resolve("PhilipWife")).toEqual(new PhilipPartner());
-            expect(resolve("PhilipWife").name).toEqual(new PhilipPerson());
-          });
-
-          it("custom name excluding default class name", () => {
-            expect(() => resolve("PhilipPartner")).toThrowError();
-          });
-        });
+      it("works with constructor arguments", () => {
+        expect(new Stranger("Philip")).toEqual({ name: "Philip" });
       });
 
-      describe("provides named", () => {
-        @singletonNamed("Terry")
-        class TerryPerson extends Person {
-          constructor(name = "Terry") {
-            super(name);
-          }
-        }
-
-        it("with constructor arguments", () => {
-          expect(new TerryPerson("terry").name).toEqual("terry");
-        });
-
-        it("custom name", () => {
-          expect(resolve("Terry")).toEqual({ name: "Terry" });
-        });
-
-        it("custom name excluding default class name", () => {
-          expect(() => resolve("TerryPerson")).toThrowError();
-        });
-
-        describe("with injection", () => {
-          @singletonNamed("TerryWife")
-          @inject("Terry")
-          class TerryPartner extends Person {}
-
-          it("with constructor arguments", () => {
-            expect(new TerryPartner("Terry Wife").name).toEqual("Terry Wife");
-          });
-
-          it("custom name", () => {
-            expect(resolve("TerryWife")).toEqual(new TerryPartner());
-            expect(resolve("TerryWife").name).toEqual(new TerryPerson());
-          });
-
-          it("custom name excluding default class name", () => {
-            expect(() => resolve("TerryPartner")).toThrowError();
-          });
-        });
+      it("works with class name", () => {
+        expect(resolve("Stranger")).toEqual({ name: "Unknown" });
       });
+    }
+  );
+
+  describe.each([
+    ["singletonNamed", singletonNamed],
+    ["generatorNamed", generatorNamed]
+  ])("%s", (_, decorator) => {
+    @decorator("custom")
+    class CustomPerson extends Person {}
+
+    // eslint-disable-next-line jest/no-identical-title
+    it("works with constructor arguments", () => {
+      expect(new CustomPerson("Philip")).toEqual({ name: "Philip" });
+    });
+
+    it("works with custom name", () => {
+      expect(resolve("custom")).toEqual({ name: "Unknown" });
+    });
+
+    it("throws for class name", () => {
+      expect(() => resolve("CustomPerson")).toThrowError();
     });
   });
-  describe("generates", () => {
-    class Counter {
-      static count = 0;
 
-      constructor(name = "Unknown") {
-        this.name = name;
-        Counter.count++;
-        this.count = Counter.count;
-      }
-    }
+  describe.each([
+    ["generator", generator, "GeneratedPerson"],
+    ["generatorNamed", generatorNamed("Robot"), "Robot"]
+  ])("%s", (_, decorator, key) => {
+    it("creates new instance on each injection", () => {
+      @decorator
+      class GeneratedPerson extends Person {
+        static counter = 0;
 
-    @generator
-    class UnknownCounter extends Counter {}
-
-    it("with constructor arguments", () => {
-      const { count } = Counter;
-      const instance = new UnknownCounter("John");
-      expect(instance.name).toEqual("John");
-      expect(instance.count).toEqual(count + 1);
-    });
-    it("with class name", () => {
-      const { count } = Counter;
-      const instance = resolve("UnknownCounter");
-      expect(instance.name).toEqual("Unknown");
-      expect(instance.count).toEqual(count + 1);
-    });
-
-    it("new instances", () => {
-      const { count } = Counter;
-      let instance = resolve("UnknownCounter");
-      expect(instance.count).toEqual(count + 1);
-      instance = resolve("UnknownCounter");
-      expect(instance.count).toEqual(count + 2);
-    });
-    describe("named with", () => {
-      describe("provided and named", () => {
-        @generatorNamed("PhilipCount")
-        class PhilipCounter extends Counter {
-          constructor(name = "Philip") {
-            super(name);
-          }
+        constructor(name) {
+          super(name);
+          GeneratedPerson.counter++;
         }
-
-        it("with constructor arguments", () => {
-          const { count } = Counter;
-          const instance = new PhilipCounter("philip");
-          expect(instance.name).toEqual("philip");
-          expect(instance.count).toEqual(count + 1);
-        });
-
-        it("custom name", () => {
-          const { count } = Counter;
-          const instance = resolve("PhilipCount");
-          expect(instance.name).toEqual("Philip");
-          expect(instance.count).toEqual(count + 1);
-        });
-
-        it("custom name excluding default class name", () => {
-          expect(() => resolve("PhilipCounter")).toThrowError();
-        });
-      });
-
-      describe("provides named", () => {
-        @generatorNamed("TerryCount")
-        class TerryCounter extends Counter {
-          constructor(name = "Terry") {
-            super(name);
-          }
-        }
-
-        it("with constructor arguments", () => {
-          const { count } = Counter;
-          const instance = new TerryCounter("terry");
-          expect(instance.name).toEqual("terry");
-          expect(instance.count).toEqual(count + 1);
-        });
-
-        it("custom name", () => {
-          const { count } = Counter;
-          const instance = resolve("TerryCount");
-          expect(instance.name).toEqual("Terry");
-          expect(instance.count).toEqual(count + 1);
-        });
-
-        it("custom name excluding default class name", () => {
-          expect(() => resolve("TerryCounter")).toThrowError();
-        });
-      });
-    });
-  });
-  describe("generates named", () => {
-    @generatorNamed("John")
-    @inject()
-    class Person {
-      constructor(name = "Unknown") {
-        this.name = name;
       }
-    }
+      for (let i = 0; i < 100; i++) {
+        expect(GeneratedPerson.counter).toEqual(i);
+        expect(new GeneratedPerson(i)).toEqual({ name: i });
+      }
 
-    it("with constructor arguments", () => {
-      expect(resolve("John")).toEqual(new Person());
+      for (let i = 100; i < 200; i++) {
+        expect(GeneratedPerson.counter).toEqual(i);
+        expect(resolve(key)).toEqual({ name: "Unknown" });
+      }
+
+      @inject(key)
+      class Test {
+        constructor(argument, injection) {
+          this.argument = argument;
+          this.injection = injection;
+        }
+      }
+      for (let i = 200; i < 300; i++) {
+        expect(GeneratedPerson.counter).toEqual(i);
+        expect(new Test("argument", i)).toEqual({
+          argument: "argument",
+          injection: i
+        });
+      }
     });
   });
 });

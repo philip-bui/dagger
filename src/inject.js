@@ -1,5 +1,5 @@
 const { resolve, resolveDependencies } = require("./resolve");
-const { assignMetadata } = require("./services");
+const { assignDaggerProperties } = require("./services");
 
 const validateInjections = names =>
   names.forEach(name => {
@@ -17,7 +17,15 @@ const reduceDependenciesToObject = names =>
 const assignDependencies = (target, names) =>
   Object.assign(target, reduceDependenciesToObject(names));
 
-const assignProperties = Class =>
+const assignDependenciesDynamic = (target, names) => {
+  names.forEach(name => {
+    Object.defineProperty(target, name, {
+      get: () => resolve(name)
+    });
+  });
+};
+
+const copyPropertiesToConstructor = Class =>
   Object.keys(Class).forEach(key => {
     Class.constructor[key] = Class[key];
   });
@@ -30,8 +38,8 @@ const inject = (...names) => {
         ...args,
         ...resolveDependencies(Class.constructor._dagger.dependencies)
       );
-    assignProperties(Class);
-    assignMetadata(Class.constructor, {
+    copyPropertiesToConstructor(Class);
+    assignDaggerProperties(Class.constructor, {
       name: Class.name,
       dependencies: names
     });
@@ -42,22 +50,14 @@ const inject = (...names) => {
 const injectPrototype = (...names) => {
   validateInjections(names);
   return Class => {
-    Class.constructor = (...args) => {
-      assignDependencies(Class.prototype, names);
-      return new Class(...args);
-    };
-    assignProperties(Class);
-    assignMetadata(Class.constructor, {
-      name: Class.name
-    });
-    return Class.constructor;
+    assignDependencies(Class.prototype, names);
   };
 };
 
-const injectStatic = (...names) => {
+const injectPrototypeDynamic = (...names) => {
   validateInjections(names);
   return Class => {
-    assignDependencies(Class.prototype, names);
+    assignDependenciesDynamic(Class.prototype, names);
   };
 };
 
@@ -65,8 +65,8 @@ module.exports = {
   validateInjections,
   reduceDependenciesToObject,
   assignDependencies,
-  assignProperties,
+  copyPropertiesToConstructor,
   inject,
   injectPrototype,
-  injectStatic
-}
+  injectPrototypeDynamic
+};

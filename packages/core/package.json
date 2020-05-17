@@ -1,6 +1,6 @@
 {
   "name": "@dagger-js/core",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Core utilities for Dagger dependency injection",
   "main": "src/index.js",
   "publishConfig": {
@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://github.com/philip-bui/dagger.git"
   },
-  "homepage": "https://github.com/philip-bui/tree/master/packages/core#readme",
+  "homepage": "https://github.com/philip-bui/dagger#readme",
   "bugs": {
     "url": "https://github.com/philip-bui/dagger/issues"
   },
@@ -35,6 +35,5 @@
   ],
   "dependencies": {
     "reflect-metadata": "*"
-  },
-  "gitHead": "5ffd402c4bf334cd9b25ea445c24fe2b3e13bb74"
+  }
 }

@@ -4,7 +4,6 @@
   "workspaces": [
     "packages/*"
   ],
-  "version": "2.0.0",
   "description": "Declarative dependency injection using Javascript decorators",
   "scripts": {
     "release": "lerna publish",

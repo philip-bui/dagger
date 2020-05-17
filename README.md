@@ -4,139 +4,179 @@
 [![npm](https://img.shields.io/npm/v/dagger-di.svg?style=flat)](https://www.npmjs.com/package/dagger-di)
 ![Downloads](https://img.shields.io/npm/dt/dagger-di.svg?style=flat)
 
-Dagger is a dependency injection container using Decorators. 
+Declarative dependency injection for Javascript, inspired by Java's [Dagger](https://dagger.dev/).
 
-- Tested with React Class and Functional components using Props.
-- Tested with Singletons.
-- Tested with Generators.
-- Lazy loads dependencies until construction.
+- **Declarative.** Dagger makes it easy to read and build complex applications. 
+Annotate dependencies, compose them and Dagger handles the wiring and injections.
+- **Expressive.** Few simple decorators, yet powerful. Use a minimalistic API extended by rich options chaining.
+- **Interoperable.** Adopt as little or as much dependency injection as you want. 
+Dagger helps improve class cohesion, loose coupling and testability.
 
 ## Installation
 
-Dagger relies on the experimental [stage-0 decorators](https://github.com/tc39/proposal-decorators). 
+```bash
+$ yarn add @dagger/core
+```
+
+Babel is used to compile decorators syntax and maintain compatibility with old JS environments. Add the [class](https://babeljs.io/docs/en/babel-plugin-proposal-decorators), 
+[properties](https://babeljs.io/docs/en/babel-plugin-proposal-class-properties) and 
+[parameter](https://www.npmjs.com/package/babel-plugin-parameter-decorator) decorator plugins.
 
 ```bash
-$ npm install dagger-di 
-$ npm install @babel/plugin-proposal-decorators @babel/plugin-proposal-class-properties --save-dev
+$ yarn add -D @babel/plugin-proposal-decorators @babel/plugin-proposal-class-properties babel-plugin-parameter-decorator 
 ```
-
-```bash
-$ yarn add dagger-di 
-$ yarn add -D @babel/plugin-proposal-decorators @babel/plugin-proposal-class-properties
-```
-
-Turn on Decorators in Babel.
 
 ```javascript
-{
-    // React.
-    "babel": {
-        "presets": [
-            "@babel/preset-env",
-            "@babel/preset-react"
-        ],
-        "plugins": [
-            [
-                "@babel/plugin-proposal-decorators",
-                {
-                    "legacy": true
-                }
-            ],
-            "@babel/plugin-proposal-class-properties"
-        ]
-    }
-    // React-Native.
-    "babel": {
-        "presets": [
-            "module:metro-react-native-babel-preset"
-        ],
-        "plugins": [
-            [
-                "@babel/plugin-proposal-decorators", 
-                {
-                    "legacy": true 
-                }
-            ],
-            "@babel/plugin-proposal-class-properties"
-        ]
-    }
-}
+"plugins": [
+    ["@babel/plugin-proposal-decorators", {"legacy": true}],
+    ["@babel/plugin-proposal-class-properties", {"loose": true}],
+    "babel-plugin-parameter-decorator"
+]
 ```
 
-Turn on Decorators in ESLint.
+If you're using ESLint (and you probably should!), add the [babel-eslint](https://github.com/babel/babel-eslint) 
+parser to run on Babel compiled code.
 
 ```javascript
-package.json
-{
-    ...,
-    "eslintConfig": {
+$ yarn add -D babel-eslint
+```
+
+```json
+"eslintConfig": {
+    "parser": "babel-eslint",
+    "parserOptions": {
         "ecmaFeatures": {
-            "experimentalDecorators": true,
             "legacyDecorators": true
         }
-    }
+    },
 }
 ```
 
 ## Usage
 
 ```javascript
-import { singleton } from "dagger-di";
+import { Provides } from "@dagger/core";
 
-// Registers "Foo" with a singleton Foo.
-@singleton
-class Foo {
-
+@Provides
+class FoodService {
+    
+    getFood = () => ["Apple"];
 }
 ```
 
 ```javascript
-import { inject, generator } from "dagger";
+import { Singleton } from "@dagger/core";
 
-// Registers "Bar" with a Generator creating 
-// a new instance for every injection of "Bar".
-@generator
-@inject("Foo")
-class Bar {
-    constructor(foo) {
-        this.foo = foo;
+@Singleton
+class HeroService {
+
+    getHeroes = () => ["Saitama"];
+}
+```
+
+<details>
+<summary>Constructor Injection</summary>
+<p>
+
+```javascript
+import { Inject, Named } from "@dagger/core";
+
+@Inject
+class HeroAcademcy {
+    
+    constructor(@Named("HeroService") heroService, water, @Named("FoodService") foodService) {
+        this.heroes = heroService.getHeroes();
+        this.water = water;
+        this.food = foodService.getFood();
     }
 }
+
+const heroAcademy = new HeroAcademcy(undefined, ["Water"]);
+
+console.log(heroAcademy.heroes); // ["Saitama"];
+console.log(heroAcademy.water); // ["Water"];
+console.log(heroAcademy.food); // ["Apple"];
 ```
+</p>
+</details>
+
+<details>
+<summary>Property Injection</summary>
+<p>
 
 ```javascript
-export const warrior = () => {};
+import { Inject } from "@dagger/core";
+import HeroService from "./HeroService";
 
-export const ninja = () => {};
+class HeroAcademcy {
+    
+    @Inject
+    heroService = HeroService; // Class
 
-export const archer = () => {};
-```
+    @Inject
+    HeroService = null;
 
-```javascript
-import { register, registerLazily, registerModule } from "dagger-di";
-import { injectProps } from "dagger-di/src/react"
-// Load the module to load the singleton decorator.
-import from "./Foo"; 
+    @Inject.optional
+    godService = null;
 
-// Or manually register without decorators.
-register("BarTwo", require("./Bar"));
-
-// Or register a lazy function to evaluate when it is used.
-registerLazily("LazyBar", () => require("./Bar"));
-
-// Or register all exports within a module.
-registerModule(require("./module"));
-
-// Throws an error if any dependencies haven't been registered.
-// On construction, Dagger will inject the dependencies for you.
-@injectProps("Foo", "Bar", "LazyBar", "warrior", "ninja")
-class FooBar extends Component {
-
-    render() {
-        const { Foo, Bar, LazyBar, warrior, ninja } = this.props;
-    }
+    @Inject.named("HeroService")
+    peopleService = null;
 }
+
+const heroAcademy = new HeroAcademcy();
+
+console.log(heroAcademy.heroService.getHeroes()); // ["Saitama"];
+console.log(heroAcademy.HeroService.getHeroes()); // ["Saitama"];
+console.log(heroAcademy.godService); // null;
+console.log(heroAcademy.peopleService.getHeroes()); // ["Saitama"];
 ```
+</p>
+</details>
+
+## Advanced
+
+Decorators are exported both capitalized and lower-case for convenience.
+
+Extend your decorators with chainable options, chaining the same option twice will use the latter option.
+
+### @Provides
+
+Class decorator that declares a Class as Provider, creating new instances upon every injection.
+
+- **lazy** - Instantiate instance lazily. 
+  - Default: *false*
+- **named(name)** - Register dependency under `name`. 
+  - Default: *Class*
+
+### @Singleton
+
+Class decorator that declares a Class as Singleton, creating a single instance for every injection.
+
+- **lazy** - Instantiate instance lazily.
+  - Default: *false*
+- **named(name)** - Registers dependency under `name`. 
+  - Default: *Class*
+
+### @Inject
+
+Class or property injection decorator that injects on constructor parameters, or ClassType or PropertyKey respectively.
+
+- **computed** - Computed property. 
+  - Default: *false*.
+- **lazy** - Computed property until invoked once, then becomes a static value. 
+  - Default: *false*.
+- **optional** - Injects `undefined` if not found. 
+  - Default: *false*
+- **named(name)** - Injects dependency under `name`. 
+  - Default: *Class*
+  
+> Note: Calling a constructor with provided values means Dagger won't override those values (unless `undefined`). This is by design.
+
+### @Named(name)
+
+Constructor parameter decorator used in conjunction with [@Inject](#@Inject).
+
+- **optional** - Injects `undefined` if not found.
 
 ## License
 

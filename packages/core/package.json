@@ -1,0 +1,39 @@
+{
+  "name": "@dagger-js/core",
+  "version": "2.0.1",
+  "description": "Core utilities for Dagger dependency injection",
+  "main": "src/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Philip Bui",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philip-bui/dagger.git"
+  },
+  "homepage": "https://github.com/philip-bui/dagger#readme",
+  "bugs": {
+    "url": "https://github.com/philip-bui/dagger/issues"
+  },
+  "keywords": [
+    "dagger",
+    "core",
+    "dependency",
+    "injection",
+    "dependency injection",
+    "di",
+    "decorators",
+    "annotation",
+    "declarative",
+    "inversion of control",
+    "dependency inversion",
+    "loose coupling"
+  ],
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "reflect-metadata": "*"
+  }
+}

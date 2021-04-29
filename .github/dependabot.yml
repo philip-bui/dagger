@@ -1,0 +1,18 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "19:00"
+  open-pull-requests-limit: 99
+  reviewers:
+  - philip-bui
+  assignees:
+  - philip-bui
+  labels:
+  - dependencies
+  ignore:
+  - dependency-name: "@babel/plugin-proposal-class-properties"
+    versions:
+    - 7.13.0
